@@ -40,9 +40,10 @@ export default function ProjectsCarousel() {
     },
     {
       title: "Portfolio Website",
-      imageSrc: "/home-novel.png",
+      imageSrc: "/portfolio.png",
       description: "Personal portfolio showcase",
-      tags: ["NextJS", "TailwindCSS", "Three.js"],
+      tags: ["NextJS", "TailwindCSS"],
+      link:"https://github.com/PhurinGZ/Portfolio"
     },
     {
       title: "E-Commerce",
@@ -51,12 +52,6 @@ export default function ProjectsCarousel() {
         "A modern e-commerce platform built with Next.js, TypeScript, and Tailwind CSS, featuring a responsive UI, product listings, shopping cart functionality, and MongoDB integration for dynamic product management.",
       tags: ["Tailwindcss", "TypeScript", "MongoDB", "Nextjs"],
       link: "https://github.com/Thuje009/project-e-commerce",
-    },
-    {
-      title: "Weather Forecast App",
-      imageSrc: "/home-novel.png",
-      description: "Real-time weather data visualization",
-      tags: ["React", "GraphQL", "D3.js"],
     },
   ];
 
