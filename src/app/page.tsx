@@ -79,7 +79,7 @@ export default function Home() {
                 </div>
                 <div className="text-left">
                   <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-                    สวัสดีครับ, ผมชื่อ ภูรินทร์ กันเนตรกาศ
+                    สวัสดีครับ, ผมชื่อ ภูรินทร์ กันเนตรกาศ ( บาส )
                   </h1>
                   <h2 className="text-2xl md:text-3xl font-medium text-gray-600 dark:text-gray-300 mb-2">
                     Software Engineer 👋
