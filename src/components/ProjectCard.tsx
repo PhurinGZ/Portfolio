@@ -32,6 +32,8 @@ export const ProjectCard = memo<ProjectCardProps>(({
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
+// console.log(description)
+
   return (
     <motion.div 
       className="group relative h-full"

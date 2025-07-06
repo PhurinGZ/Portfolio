@@ -8,7 +8,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useMousePosition } from "@/hooks/useMousePosition";
 import { useClipboard } from "@/hooks/useClipboard";
 import { ANIMATION_VARIANTS } from "@/constants/animations";
-import { SKILLS_DATA } from "@/constants/skills";
 import Navbar from "@/components/Navbar";
 import { Toast } from "@/components/ui/toast";
 import Image from "next/image";
@@ -93,31 +92,6 @@ const InteractiveLight = memo(
 );
 
 InteractiveLight.displayName = "InteractiveLight";
-
-const SkillBadge = memo(
-  ({ skill, index }: { skill: (typeof SKILLS_DATA)[0]; index: number }) => (
-    <motion.span
-      className={`px-5 py-3 bg-gradient-to-r ${skill.color} backdrop-blur-sm border border-white/40 dark:border-gray-600/40 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 cursor-pointer shadow-lg`}
-      variants={ANIMATION_VARIANTS.skill}
-      whileHover="hover"
-      whileTap={{ scale: 0.95 }}
-      custom={index}
-      animate={{
-        y: [0, -5, 0],
-      }}
-      transition={{
-        duration: 3,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: index * 0.2,
-      }}
-    >
-      {skill.name}
-    </motion.span>
-  )
-);
-
-SkillBadge.displayName = "SkillBadge";
 
 const ContactCard = memo(
   ({
@@ -370,22 +344,6 @@ export default function Home() {
                             รักการเรียนรู้ และชอบหาอะไรใหม่ๆ ทำอยู่เสมอ
                           </motion.span>
                         </p>
-                      </motion.div>
-
-                      {/* Skills Tags */}
-                      <motion.div
-                        className="flex flex-wrap gap-4 pt-6 justify-center md:justify-start"
-                        initial="hidden"
-                        animate="visible"
-                        variants={ANIMATION_VARIANTS.container}
-                      >
-                        {SKILLS_DATA.map((skill, index) => (
-                          <SkillBadge
-                            key={skill.name}
-                            skill={skill}
-                            index={index}
-                          />
-                        ))}
                       </motion.div>
                     </motion.div>
                   </div>

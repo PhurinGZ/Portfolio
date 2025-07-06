@@ -140,6 +140,8 @@ const ProjectsCarousel: React.FC = () => {
     setSearchQuery("");
   }, []);
 
+  console.log(visibleProjects)
+
   return (
     <div className="space-y-8">
       {/* Control Panel */}
