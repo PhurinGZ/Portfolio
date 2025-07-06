@@ -1,5 +1,5 @@
 // components/ui/toast.tsx
-import { ReactNode, useEffect, useState } from 'react';
+import { FC, ReactNode, useEffect, useState } from 'react';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info, Sparkles } from 'lucide-react';
 
 export type ToastVariant = 'info' | 'success' | 'warning' | 'error';
@@ -14,7 +14,7 @@ export interface ToastProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
 }
 
-export const Toast = ({ 
+export const Toast:FC<ToastProps> = ({ 
   variant = 'success', 
   title, 
   children, 

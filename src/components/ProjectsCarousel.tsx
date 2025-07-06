@@ -1,206 +1,258 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import React, { useState, useMemo, useCallback, memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Filter, Grid, List } from "lucide-react";
 import { ProjectCard } from "./ProjectCard";
-import { ChevronLeft, ChevronRight, Filter, Grid, List } from "lucide-react";
 
-export const ProjectsCarousel = () => {
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-  const [filterTag, setFilterTag] = useState('All');
-  const [visibleProjects, setVisibleProjects] = useState([]);
+interface Project {
+  title: string;
+  imageSrc?: string;
+  description: string;
+  tags: string[];
+  link?: string;
+  githubLink?: string;
+  stats?: {
+    stars?: number;
+    views?: number;
+  };
+}
 
-  const projects = [
+// Memoized filter button component
+const FilterButton = memo<{
+  tag: string;
+  isActive: boolean;
+  onClick: (tag: string) => void;
+}>(({ tag, isActive, onClick }) => {
+  const handleClick = useCallback(() => onClick(tag), [tag, onClick]);
+  
+  return (
+    <motion.button
+      onClick={handleClick}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ${
+        isActive
+          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg border-2 border-white/30"
+          : "backdrop-blur-lg bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-gray-700/30"
+      }`}
+    >
+      <span className="flex items-center gap-2">
+        {tag === "All" && <Filter size={16} />}
+        {tag}
+      </span>
+    </motion.button>
+  );
+});
+
+FilterButton.displayName = "FilterButton"
+
+const ProjectsCarousel: React.FC = () => {
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [filterTag, setFilterTag] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const projects: Project[] = useMemo(() => [
     {
       title: "Web Novel Application",
-      imageSrc: "/api/placeholder/400/300",
+      imageSrc: "/home-novel.png",
       description: "A sophisticated web application for reading novels online with beautiful typography, dark mode, bookmarks, and an immersive reading experience with customizable themes.",
       tags: ["React", "NextJS", "TailwindCSS", "TypeScript"],
       link: "#",
-      githubLink: "https://github.com/example/web-novel"
+      githubLink: "https://github.com/example/web-novel",
+      stats: { stars: 24, views: 856 },
     },
     {
       title: "LOFI Music Player",
-      imageSrc: "/api/placeholder/400/300",
+      imageSrc: "/Lofi.png",
       description: "A captivating music streaming platform with ambient backgrounds, rain sounds, and focus modes. Perfect for productivity and relaxation with curated playlists.",
       tags: ["React JS", "Material UI", "MongoDB", "Node.js"],
       link: "https://github.com/PhurinGZ/LOFI",
-      githubLink: "https://github.com/PhurinGZ/LOFI"
+      githubLink: "https://github.com/PhurinGZ/LOFI",
+      stats: { stars: 42, views: 1200 },
     },
     {
       title: "Web Blog Platform",
-      imageSrc: "/api/placeholder/400/300",
+      imageSrc: "/web-blog.png",
       description: "A modern blog platform with rich text editing, comment system, user authentication, and responsive design. Built with modern web technologies.",
       tags: ["Node.js", "React.js", "MongoDB", "Express"],
       link: "https://github.com/PhurinGZ/webBlogDemo",
-      githubLink: "https://github.com/PhurinGZ/webBlogDemo"
+      githubLink: "https://github.com/PhurinGZ/webBlogDemo",
+      stats: { stars: 18, views: 634 },
     },
     {
       title: "Portfolio Website",
-      imageSrc: "/api/placeholder/400/300",
+      imageSrc: "/portfolio.png",
       description: "Personal portfolio showcase with modern design, smooth animations, interactive elements, and responsive layout. Built with performance in mind.",
       tags: ["NextJS", "TailwindCSS", "Framer Motion", "TypeScript"],
       link: "https://github.com/PhurinGZ/Portfolio",
-      githubLink: "https://github.com/PhurinGZ/Portfolio"
+      githubLink: "https://github.com/PhurinGZ/Portfolio",
+      stats: { stars: 67, views: 2100 },
     },
     {
       title: "E-Commerce Platform",
-      imageSrc: "/api/placeholder/400/300",
+      imageSrc: "/e-commerce.png",
       description: "A comprehensive e-commerce solution with product management, shopping cart, payment integration, order tracking, and admin dashboard.",
       tags: ["TailwindCSS", "TypeScript", "MongoDB", "NextJS"],
       link: "https://github.com/Thuje009/project-e-commerce",
-      githubLink: "https://github.com/Thuje009/project-e-commerce"
+      githubLink: "https://github.com/Thuje009/project-e-commerce",
+      stats: { stars: 31, views: 945 },
     },
-    {
-      title: "Task Management App",
-      imageSrc: "/api/placeholder/400/300",
-      description: "A collaborative task management application with real-time updates, team collaboration features, and advanced project tracking capabilities.",
-      tags: ["React", "Socket.io", "PostgreSQL", "Redux"],
-      link: "#",
-      githubLink: "https://github.com/example/task-manager"
-    }
-  ];
+  ], []);
 
   // Get unique tags for filtering
-  const allTags = ['All', ...new Set(projects.flatMap(project => project.tags))];
+  const allTags = useMemo(() => {
+    return ["All", ...new Set(projects.flatMap((project) => project.tags))];
+  }, [projects]);
 
-  useEffect(() => {
-    const filtered = filterTag === 'All' 
-      ? projects 
-      : projects.filter(project => project.tags.includes(filterTag));
-    setVisibleProjects(filtered);
-  }, [filterTag]);
+  // Filter projects based on tag and search query
+  const visibleProjects = useMemo(() => {
+    let filtered = projects;
+
+    if (filterTag !== "All") {
+      filtered = filtered.filter((project) => project.tags.includes(filterTag));
+    }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (project) =>
+          project.title.toLowerCase().includes(query) ||
+          project.description.toLowerCase().includes(query) ||
+          project.tags.some((tag) => tag.toLowerCase().includes(query))
+      );
+    }
+
+    return filtered;
+  }, [filterTag, searchQuery, projects]);
+
+  // Memoized callbacks
+  const handleFilterChange = useCallback((tag: string) => {
+    setFilterTag(tag);
+  }, []);
+
+  const handleViewModeChange = useCallback((mode: "grid" | "list") => {
+    setViewMode(mode);
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setFilterTag("All");
+    setSearchQuery("");
+  }, []);
 
   return (
     <div className="space-y-8">
-      {/* Enhanced Control Panel */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8">
+      {/* Control Panel */}
+      <motion.div
+        className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         {/* Filter Tags */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 justify-center">
           {allTags.map((tag) => (
-            <button
+            <FilterButton
               key={tag}
-              onClick={() => setFilterTag(tag)}
-              className={`px-4 py-2 rounded-full font-medium transition-all duration-500 transform hover:scale-105 ${
-                filterTag === tag
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg border-2 border-white/30'
-                  : 'backdrop-blur-xl bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-gray-700/30'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                {tag === 'All' && <Filter size={16} />}
-                {tag}
-              </span>
-            </button>
+              tag={tag}
+              isActive={filterTag === tag}
+              onClick={handleFilterChange}
+            />
           ))}
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-2 backdrop-blur-xl bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 rounded-xl p-1">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all duration-300 ${
-              viewMode === 'grid'
-                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                : 'text-gray-600 dark:text-gray-400 hover:text-blue-500'
+        <div className="flex items-center gap-2 backdrop-blur-lg bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 rounded-xl p-1">
+          <motion.button
+            onClick={() => handleViewModeChange("grid")}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`p-2 rounded-lg transition-all duration-200 ${
+              viewMode === "grid"
+                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+                : "text-gray-600 dark:text-gray-400 hover:text-blue-500"
             }`}
           >
             <Grid size={18} />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-all duration-300 ${
-              viewMode === 'list'
-                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                : 'text-gray-600 dark:text-gray-400 hover:text-blue-500'
+          </motion.button>
+          <motion.button
+            onClick={() => handleViewModeChange("list")}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`p-2 rounded-lg transition-all duration-200 ${
+              viewMode === "list"
+                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+                : "text-gray-600 dark:text-gray-400 hover:text-blue-500"
             }`}
           >
             <List size={18} />
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Enhanced Projects Grid */}
+      {/* Projects Grid */}
       <div className="relative">
-        {/* Floating Background Elements */}
-        <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute -bottom-20 -right-20 w-32 h-32 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-float-reverse"></div>
+        {/* Simplified Background Elements */}
+        <div className="absolute -top-10 -left-10 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl" />
 
-        <div className={`relative grid gap-8 ${
-          viewMode === 'grid' 
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-            : 'grid-cols-1 max-w-4xl mx-auto'
-        }`}>
-          {visibleProjects.map((project, index) => (
-            <div 
-              key={index} 
-              className="animate-fade-in-up"
-              style={{ 
-                animationDelay: `${index * 0.1}s`,
-                animationFillMode: 'both'
-              }}
-            >
-              <ProjectCard {...project} />
-            </div>
-          ))}
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${viewMode}-${filterTag}`}
+            className={`relative grid gap-6 ${
+              viewMode === "grid"
+                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-1 max-w-4xl mx-auto"
+            }`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {visibleProjects.map((project, index) => (
+              <motion.div
+                key={project.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className="h-full"
+              >
+                <ProjectCard {...project} />
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Empty State */}
-        {visibleProjects.length === 0 && (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4 opacity-50">🔍</div>
-            <p className="text-xl text-gray-500 dark:text-gray-400">
-              ไม่พบโปรเจคที่ตรงกับฟิลเตอร์ "{filterTag}"
-            </p>
-            <button 
-              onClick={() => setFilterTag('All')}
-              className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full font-medium hover:scale-105 transition-all duration-300 shadow-lg"
+        <AnimatePresence>
+          {visibleProjects.length === 0 && (
+            <motion.div
+              className="text-center py-16"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
             >
-              ดูทั้งหมด
-            </button>
-          </div>
-        )}
+              <div className="text-4xl mb-4 opacity-50">🔍</div>
+              <p className="text-xl text-gray-500 dark:text-gray-400 mb-4">
+                {searchQuery
+                  ? `ไม่พบโปรเจคที่ตรงกับ "${searchQuery}"`
+                  : `ไม่พบโปรเจคที่ตรงกับฟิลเตอร์ "${filterTag}"`}
+              </p>
+              <motion.button
+                onClick={handleResetFilters}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full font-medium shadow-lg transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                ดูทั้งหมด
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Project Count */}
-      <div className="text-center">
-        <p className="text-gray-600 dark:text-gray-400 font-medium">
-          แสดง {visibleProjects.length} จาก {projects.length} โปรเจค
-        </p>
-      </div>
-
-      {/* Enhanced CSS Styles */}
-      <style jsx>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(-20px) translateX(10px); }
-        }
-        
-        @keyframes float-reverse {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(20px) translateX(-10px); }
-        }
-        
-        .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out;
-        }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .animate-float-reverse {
-          animation: float-reverse 8s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 };
+
+export default memo(ProjectsCarousel);

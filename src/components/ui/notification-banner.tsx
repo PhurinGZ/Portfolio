@@ -1,6 +1,6 @@
 // components/ui/notification-banner.tsx
 import { FC, ReactNode, useEffect, useState } from 'react';
-import { AlertCircle, AlertTriangle, CheckCircle, Info, X, Sparkles, Bell } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle, Info, X, Bell } from 'lucide-react';
 
 export type BannerVariant = 'info' | 'success' | 'warning' | 'error';
 
